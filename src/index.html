@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MayDay..Jungle Survival</title>
+  <style>
+    body, html {
+        margin: 0; padding: 0; width: 100%; height: 100%;
+        background-color: #000; overflow: hidden;
+        font-family: 'Courier New', Courier, monospace;
+    }
+    
+    #engine-container {
+        position: relative;
+        width: 800px;
+        height: 600px;
+        margin: auto;
+        top: 50%;
+        transform: translateY(-50%);
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    canvas {
+        background-color: #87CEEB; 
+        image-rendering: pixelated; 
+        width: 100%; height: 100%;
+        position: absolute;
+        top: 0; left: 0;
+    }
+
+    .ui-layer {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        display: none; 
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-size: cover;
+        background-position: center;
+        user-select: none;
+    }
+
+    #ui-loading { background-color: #1a1a1a; color: white; display: flex; }
+    #ui-menu {
+        background-image: url('../src/assets/jungle_bg.png');
+        background-color: #0a2e0a; color: white;
+    }
+    #ui-menu::before {
+        content: ''; position: absolute; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.4); z-index: 0;
+    }
+    #ui-settings, #ui-gameover { background-color: rgba(0, 0, 0, 0.85); color: white; }
+
+    .ui-content { z-index: 1; text-align: center; }
+    h1 { font-size: 52px; text-shadow: 4px 4px 0px #000; margin-bottom: 40px; color: #ffcc00; text-transform: uppercase; border-bottom: 2px solid white; padding-bottom: 10px; }
+    h2 { font-size: 36px; color: #ff3333; text-shadow: 2px 2px #000;}
+
+    .btn {
+        display: block; width: 250px; padding: 15px; margin: 10px auto;
+        background-color: rgba(30, 100, 30, 0.8); border: 2px solid #55ff55;
+        color: white; font-size: 20px; font-weight: bold; text-transform: uppercase;
+        cursor: pointer; transition: all 0.2s; font-family: 'Courier New', Courier, monospace;
+    }
+    .btn:hover { background-color: #55ff55; color: #000; transform: scale(1.05); }
+    
+    select {
+        display: block; width: 250px; padding: 10px; margin: 10px auto;
+        background: rgba(0, 0, 0, 0.7); color: #fff; font-size: 16px; border: 1px solid #55ff55;
+        cursor: pointer; font-family: 'Courier New', Courier, monospace;
+    }
+
+    .placeholder-box { width: 300px; padding: 20px; border: 1px dashed #fff; margin: 10px auto; color: #aaa; }
+
+    /* HUD LAYER (MINIMALIST) */
+    #ui-hud {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        display: none; /* Block when playing */
+        pointer-events: none; /* Let clicks pass through to canvas */
+        z-index: 5;
+    }
+
+    .hud-top-left {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .hud-bar-container {
+        width: 200px;
+        height: 12px;
+        background-color: rgba(0,0,0,0.5);
+        border: 2px solid #fff;
+        position: relative;
+    }
+
+    .hud-bar-fill {
+        height: 100%;
+        width: 100%;
+        transition: width 0.1s linear;
+    }
+    
+    #hud-health-fill { background-color: #ff3333; }
+    #hud-hunger-fill { background-color: #ffcc00; }
+
+    .hud-weapon {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 64px;
+        height: 64px;
+        border: 2px solid #fff;
+        background-color: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+    
+  <div id="engine-container">
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
+      
+      <!-- HUD LAYER -->
+      <div id="ui-hud">
+          <div class="hud-top-left">
+              <div class="hud-bar-container">
+                  <div class="hud-bar-fill" id="hud-health-fill"></div>
+              </div>
+              <div class="hud-bar-container" style="width: 150px;">
+                  <div class="hud-bar-fill" id="hud-hunger-fill"></div>
+              </div>
+          </div>
+          <div class="hud-weapon">
+              FACÃO<br>[X]
+          </div>
+      </div>
+
+      <!-- LOADING LAYER -->
+      <div id="ui-loading" class="ui-layer"><div class="ui-content"><h2>CARREGANDO ASSETS...</h2></div></div>
+      <div id="ui-menu" class="ui-layer">
+          <div class="ui-content">
+              <h1>MayDay<br>Jungle Survival</h1>
+              <button class="btn" id="btn-play">INICIAR MISSÃO</button>
+              <button class="btn" id="btn-settings">CONFIGURAÇÕES</button>
+              <button class="btn" id="btn-exit">SAIR DO JOGO</button>
+          </div>
+      </div>
+      <div id="ui-settings" class="ui-layer">
+          <div class="ui-content">
+              <h2>CONFIGURAÇÕES</h2>
+              <div class="placeholder-box">Música Global [====---]<br>(Em Breve)</div>
+              <div class="placeholder-box">Remapear Controles<br>(Em Breve)</div>
+              <button class="btn" id="btn-settings-back">VOLTAR</button>
+          </div>
+      </div>
+      <div id="ui-gameover" class="ui-layer">
+          <div class="ui-content">
+              <h2>MISSION FAILED</h2>
+              <p id="stats-text" style="font-size: 20px; margin-bottom: 30px; font-weight: bold;">Sobrevivência: 0s</p>
+              <button class="btn" id="btn-restart">TENTAR NOVAMENTE</button>
+              <button class="btn" id="btn-back-menu">VOLTAR AO MENU</button>
+          </div>
+      </div>
+  </div>
+
+  <script>
+    require('../dist/renderer.js');
+  </script>
+</body>
+</html>
