@@ -1,5 +1,3 @@
----
-
 # **README.md — MayDay Jungle Survival**
 
 ## **MayDay Jungle Survival**
