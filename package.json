@@ -1,0 +1,21 @@
+{
+  "name": "mayday-jungle-survival",
+  "version": "1.0.0",
+  "description": "2D Pixel Art Survival Game",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && electron .",
+    "dev": "tsc -w | electron ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^41.1.1",
+    "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "phaser": "^4.0.0",
+    "pngjs": "^7.0.0"
+  }
+}
